@@ -38,6 +38,9 @@ RUN mkdir -p /app/prisma && chown nextjs:nodejs /app/prisma
 # Copy public
 COPY --from=builder /app/public ./public
 
+# Copy Prisma Schema (Required for db push/migrations)
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
 # Copy standalone build
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
