@@ -30,7 +30,11 @@ export async function getDeviceLiveStatus(assetId: string) {
 
         // Filter interfaces if watchedInterfaces is set
         if (asset.watchedInterfaces && metrics.interfaces && metrics.interfaces.list) {
-            const watched = asset.watchedInterfaces.split(',');
+            const watched = asset.watchedInterfaces.split(',').map((s: string) => s.trim());
+
+            // Debug Log
+            // console.log(`[SNMP] Filtering interfaces. Watched: ${watched.join('|')}`);
+
             metrics.interfaces.list = metrics.interfaces.list.filter((iface: any) =>
                 watched.includes(iface.name)
             );
@@ -251,27 +255,44 @@ async function sendPerformanceAlert(asset: any, metrics: any, alerts: string[]) 
     try {
         const { sendVulnerabilityAlert } = await import('@/lib/email-sender');
 
+        console.log(`[SNMP] Processing alert for ${asset.name}. Alerts found: ${alerts.length}`);
+
         // Check if notifications are enabled
         const settings = await prisma.notificationSettings.findFirst();
         if (!settings || !settings.enabled) {
+            console.log(`[SNMP] Alerts disabled in settings. Skipping email.`);
             return;
         }
 
+        // Determine Severity
+        // If "Interface Down" is in the alerts, treat as CRITICAL. 
+        // Otherwise treat as HIGH (Resource usage).
+        const isCritical = alerts.some(a => a.toLowerCase().includes('interface') && a.toLowerCase().includes('down'));
+
+        const criticalCount = isCritical ? 1 : 0;
+        const highCount = isCritical ? Math.max(0, alerts.length - 1) : alerts.length;
+
+        console.log(`[SNMP] Sending email (Critical: ${criticalCount}, High: ${highCount}) to ${settings.email}`);
+
         // Prepare email content (reusing vulnerability alert structure)
-        await sendVulnerabilityAlert({
-            assetName: `⚠️ Performance Alert: ${asset.name}`,
+        const sent = await sendVulnerabilityAlert({
+            assetName: `⚠️ Alert: ${asset.name} - ${alerts.join(', ')}`, // Put alerts in title for immediate visibility
             vendor: asset.vendor,
             model: asset.model,
             version: asset.version,
-            criticalCount: 0,
-            highCount: alerts.length,
+            criticalCount: criticalCount, // Force Critical if interface down
+            highCount: highCount,
             mediumCount: 0,
             lowCount: 0,
             totalCount: alerts.length,
             dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitoring`,
         });
 
-        console.log(`[SNMP] Performance alert sent for ${asset.name}`);
+        if (sent) {
+            console.log(`[SNMP] Performance alert email sent successfully for ${asset.name}`);
+        } else {
+            console.warn(`[SNMP] Email send function returned false. Check logs in email-sender.`);
+        }
     } catch (error) {
         console.error('[SNMP] Failed to send performance alert:', error);
     }
