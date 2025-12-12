@@ -14,8 +14,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Client and Template DB
-# Use absolute path for build time to ensure we know where it is
-ENV DATABASE_URL="file:./dev.db"
+# Generate Client and Template DB
+# Use absolute path in root to avoid subdirectory confusion
+ENV DATABASE_URL="file:///app/dev.db"
 RUN npx prisma generate
 RUN npx prisma db push
 
@@ -41,8 +42,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy Template DB (created in builder)
-COPY --from=builder --chown=nextjs:nodejs /app/prisma/dev.db /app/prisma/dev.db.template
+# Copy Template DB (created in builder at root)
+COPY --from=builder --chown=nextjs:nodejs /app/dev.db /app/prisma/dev.db.template
 
 USER nextjs
 
