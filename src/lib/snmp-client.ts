@@ -192,26 +192,36 @@ export async function queryDevice(
 
                 // Fetch Interfaces Table (1.3.6.1.2.1.2.2) 
                 // We fetch columns: 2 (descr), 5 (speed), 6 (mac), 8 (operStatus), 10 (in), 16 (out)
+                // Fetch Interfaces Table (1.3.6.1.2.1.2.2) 
+                // We fetch columns: 2 (descr), 5 (speed), 6 (mac), 8 (operStatus), 10 (in), 16 (out)
                 const fetchInterfaces = new Promise<void>((resolveIf) => {
                     const ifTableOid = '1.3.6.1.2.1.2.2.1'; // Use ifEntry
-                    console.log(`[SNMP] Fetching interfaces table for ${ipAddress} (OID: ${ifTableOid})...`);
+                    console.log(`[SNMP] Fetching interfaces table for ${ipAddress}...`);
+
+                    // We also want to fetch ifName (1.3.6.1.2.1.31.1.1.1.1) in case ifDescr is empty
+                    // Since we can't do a single table walk for both easily with this lib's table() method on different subtrees,
+                    // we'll fetch existing table -> then if needed, fetch ifName column.
+
                     session.table(ifTableOid, 1, (error: any, table: any) => {
                         if (error) {
                             console.error(`[SNMP] Interface table fetch error for ${ipAddress}:`, error);
-                        } else if (table) {
+                            resolveIf();
+                            return;
+                        }
+
+                        if (table) {
                             const detailedList: any[] = [];
-                            let count = 0;
+                            const indicesToNameLookup: Record<string, string> = {};
+                            const needsNameFetch: boolean = true; // Always check names for better accuracy if possible
+
+                            // First pass: Build initial list
                             for (const index in table) {
                                 const entry = table[index];
-                                // entry[2] is ifDescr. Even if empty, we might want to list it?
-                                // Some devices have empty description but have traffic.
-                                // We'll check if entry exists at all.
                                 if (entry) {
-                                    count++;
-                                    // Format MAC
-                                    let mac = '';
-                                    if (entry[6] && Buffer.isBuffer(entry[6])) {
-                                        mac = entry[6].toString('hex').match(/.{1,2}/g)?.join(':') || '';
+                                    // entry[2] is ifDescr
+                                    let name = entry[2]?.toString();
+                                    if (!name || name.trim() === '') {
+                                        name = `Port ${index}`; // Temporary placeholder
                                     }
 
                                     // Speed
@@ -223,14 +233,16 @@ export async function queryDevice(
                                         else speed = (s / 1000).toFixed(0) + 'K';
                                     }
 
-                                    let name = entry[2]?.toString();
-                                    if (!name || name.trim() === '') {
-                                        name = `Port ${index}`;
+                                    // MAC
+                                    let mac = '';
+                                    if (entry[6] && Buffer.isBuffer(entry[6])) {
+                                        mac = entry[6].toString('hex').match(/.{1,2}/g)?.join(':') || '';
                                     }
 
                                     detailedList.push({
                                         id: index,
-                                        name: name,
+                                        name: name, // Might be 'Port X'
+                                        originalDescr: entry[2]?.toString() || '',
                                         mac: mac,
                                         speed: speed,
                                         status: entry[8] === 1 ? 'Up' : 'Down',
@@ -239,16 +251,42 @@ export async function queryDevice(
                                     });
                                 }
                             }
-                            console.log(`[SNMP] Found ${detailedList.length} interfaces for ${ipAddress}`);
-                            if (metrics.interfaces) {
-                                metrics.interfaces.list = detailedList.slice(0, 48); // Limit to 48
-                            } else {
+
+                            // Fetch ifName (ifXTable) to supplement/override names
+                            // OID: 1.3.6.1.2.1.31.1.1.1.1
+                            const ifNameOid = '1.3.6.1.2.1.31.1.1.1.1';
+                            session.subtree(ifNameOid, 1, (varbinds: any[]) => {
+                                for (const vb of varbinds) {
+                                    if (!snmp.isVarbindError(vb)) {
+                                        const idx = vb.oid.split('.').pop();
+                                        if (idx) indicesToNameLookup[idx] = vb.value?.toString();
+                                    }
+                                }
+                            }, (errName: any) => {
+                                // After ifName fetch (success or fail), finalize the list
+                                if (!errName) {
+                                    detailedList.forEach(item => {
+                                        // If original descr was empty OR if we have a better name in ifName, use it.
+                                        // Usually ifName (Gi0/1) is better than ifDescr (GigabitEthernet0/1 described...)
+                                        // But logic: If we have an ifName look up, use it.
+                                        // Especially if the current name is "Port X" placeholder.
+                                        if (indicesToNameLookup[item.id]) {
+                                            // If originalDescr is empty, definitely use ifName.
+                                            // If originalDescr exists, maybe prefer ifName? 
+                                            // Let's prefer ifName if available as it's usually the canonical "interface name".
+                                            item.name = indicesToNameLookup[item.id];
+                                        }
+                                    });
+                                }
+
                                 metrics.interfaces = { count: detailedList.length, list: detailedList.slice(0, 48) };
-                            }
+                                console.log(`[SNMP] QueryDevice found ${detailedList.length} interfaces.`);
+                                resolveIf();
+                            });
                         } else {
                             console.log(`[SNMP] No interface table returned for ${ipAddress}`);
+                            resolveIf();
                         }
-                        resolveIf();
                     });
                 });
 
