@@ -472,24 +472,24 @@ export async function getInterfaceList(
             version: snmp.Version2c,
         });
 
-        const results: string[] = [];
-        const oid = '1.3.6.1.2.1.2.2.1.2'; // ifDescr
+        const oid = '1.3.6.1.2.1.2.2.1'; // ifEntry
 
-        session.subtree(oid, 20, (varbinds: any[]) => {
-            for (const vb of varbinds) {
-                if (!snmp.isVarbindError(vb)) {
-                    const index = vb.oid.split('.').pop();
-                    const name = vb.value?.toString() || `Port ${index}`;
-                    results.push(name);
-                }
-            }
-        }, (error: any) => {
+        // Use table instead of subtree for better compatibility
+        session.table(oid, 20, (error: any, table: any) => {
             session.close();
             if (error) {
-                console.error(`[SNMP] Subtree error for ${ipAddress}:`, error);
+                console.error(`[SNMP] Interface discovery error for ${ipAddress}:`, error);
+                // Fallback: Return empty list rather than throwing, allows UI to show "No interfaces"
                 resolve([]);
             } else {
-                console.log(`[SNMP] Subtree found ${results.length} interfaces for ${ipAddress}`);
+                const results: string[] = [];
+                for (const index in table) {
+                    const entry = table[index];
+                    // entry[2] is ifDescr
+                    const name = entry[2]?.toString() || `Port ${index}`;
+                    results.push(name);
+                }
+                console.log(`[SNMP] Discovery found ${results.length} interfaces for ${ipAddress}`);
                 resolve(results);
             }
         });
