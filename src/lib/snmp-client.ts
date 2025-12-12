@@ -107,7 +107,7 @@ export async function queryDevice(
             '1.3.6.1.2.1.1.4.0' // sysContact
         ];
 
-        session.get(sysOids, (error, varbinds) => {
+        session.get(sysOids, (error: any, varbinds: any) => {
             if (error) {
                 metrics.error = error.message;
                 session.close();
@@ -195,7 +195,7 @@ export async function queryDevice(
                 const fetchInterfaces = new Promise<void>((resolveIf) => {
                     const ifTableOid = '1.3.6.1.2.1.2.2.1'; // Use ifEntry
                     console.log(`[SNMP] Fetching interfaces table for ${ipAddress} (OID: ${ifTableOid})...`);
-                    session.table(ifTableOid, 20, (error, table) => {
+                    session.table(ifTableOid, 20, (error: any, table: any) => {
                         if (error) {
                             console.error(`[SNMP] Interface table fetch error for ${ipAddress}:`, error);
                         } else if (table) {
@@ -260,7 +260,7 @@ export async function queryDevice(
                         return;
                     }
 
-                    session.get(perfOids, (perfError, perfVarbinds) => {
+                    session.get(perfOids, (perfError: any, perfVarbinds: any) => {
                         if (!perfError && perfVarbinds) {
                             metrics.performance = {
                                 cpuUsage: 0,
@@ -353,7 +353,7 @@ export async function queryDevice(
             }
         });
 
-        session.on('error', (err) => {
+        session.on('error', (err: any) => {
             metrics.online = false;
             metrics.error = err.message;
             resolve(metrics);

@@ -37,12 +37,12 @@ sudo ./scripts/setup_docker.sh
 3. **Start the Application**:
    Run the following command to build and start the container in the background:
    ```bash
-   docker-compose up -d --build
+   sudo docker compose up -d --build
    ```
 
 4. **Verify Deployment**:
-   - Check status: `docker-compose ps`
-   - View logs: `docker-compose logs -f`
+   - Check status: `sudo docker compose ps`
+   - View logs: `sudo docker compose logs -f`
 
 ## Initial Setup
 

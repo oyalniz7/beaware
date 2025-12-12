@@ -36,5 +36,5 @@ sudo docker run hello-world
 
 echo "----------------------------------------------------------------"
 echo "Docker installed successfully!"
-echo "You can now run: docker-compose up -d --build"
+echo "You can now run: sudo docker compose up -d --build"
 echo "----------------------------------------------------------------"
