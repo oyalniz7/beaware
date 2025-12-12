@@ -467,35 +467,73 @@ export async function getInterfaceList(
     return new Promise((resolve, reject) => {
         const session = snmp.createSession(ipAddress, community, {
             port,
-            retries: 2,
-            timeout: 30000,
+            retries: 1,
+            timeout: 5000, // Shorter timeout for initial check
             version: snmp.Version2c,
         });
 
-        // Efficient Interface Discovery: Just walk ifDescr
-        // This is much faster than walking the whole ifEntry table and works on almost all devices.
-        const descrOid = '1.3.6.1.2.1.2.2.1.2'; // ifDescr
-        const results: string[] = [];
+        console.log(`[SNMP] Starting Interface Discovery for ${ipAddress} (Community: ${community})`);
 
-        console.log(`[SNMP] Starting lightweight interface scan for ${ipAddress}...`);
+        // Step 1: Pre-flight check (Is the device even reachable?)
+        session.get(['1.3.6.1.2.1.1.1.0'], (err: any, varbinds: any) => {
+            if (err) {
+                console.error(`[SNMP] connectivity check failed for ${ipAddress}:`, err);
+                session.close();
+                reject(new Error(`Device unreachable: ${err.message}. Check IP/VPN/Firewall.`));
+                return;
+            }
 
-        session.subtree(descrOid, 1, (varbinds: any[]) => {
-            for (const vb of varbinds) {
-                if (!snmp.isVarbindError(vb)) {
-                    const index = vb.oid.split('.').pop();
-                    const name = vb.value?.toString() || `Port ${index}`;
-                    results.push(name);
+            console.log(`[SNMP] Device is reachable. System: ${varbinds[0]?.value?.toString()}. Starting Interface Walk...`);
+
+            // Re-configure session for the walk with longer timeout
+            // Net-SNMP doesn't support changing options dynamically easily, so strict chaining or just using the session is fine.
+            // We'll proceed with the existing session but rely on standard timeouts.
+
+            const scanWithOid = (oid: string, oidName: string): Promise<string[]> => {
+                return new Promise((resScan, rejScan) => {
+                    const results: string[] = [];
+                    session.subtree(oid, 1, (vbs: any[]) => {
+                        for (const vb of vbs) {
+                            if (!snmp.isVarbindError(vb)) {
+                                const val = vb.value?.toString();
+                                if (val) results.push(val);
+                            }
+                        }
+                    }, (error: any) => {
+                        if (error) {
+                            console.warn(`[SNMP] ${oidName} scan failed:`, error);
+                            // Don't reject yet, just return empty to trigger fallback
+                            resScan([]);
+                        } else {
+                            console.log(`[SNMP] ${oidName} scan found ${results.length} items.`);
+                            resScan(results);
+                        }
+                    });
+                });
+            };
+
+            // Step 2: Try Standard ifDescr (1.3.6.1.2.1.2.2.1.2)
+            scanWithOid('1.3.6.1.2.1.2.2.1.2', 'ifDescr').then((results) => {
+                if (results.length > 0) {
+                    session.close();
+                    resolve(results);
+                    return;
                 }
-            }
-        }, (error: any) => {
-            session.close();
-            if (error) {
-                console.error(`[SNMP] Interface scan error for ${ipAddress}:`, error);
-                reject(new Error(error.message || 'Scan failed (Timeout or Network Error)'));
-            } else {
-                console.log(`[SNMP] Scan complete. Found ${results.length} interfaces for ${ipAddress}`);
-                resolve(results);
-            }
+
+                console.log('[SNMP] ifDescr empty, trying ifName fallback...');
+
+                // Step 3: Try ifName (1.3.6.1.2.1.31.1.1.1.1) - Better for some newer devices/Cisco
+                scanWithOid('1.3.6.1.2.1.31.1.1.1.1', 'ifName').then((results2) => {
+                    session.close();
+                    if (results2.length > 0) {
+                        resolve(results2);
+                    } else {
+                        // Final Fallback: ifIndex just to prove we can read validity
+                        console.error('[SNMP] Critical: No interfaces found via Descr or Name.');
+                        resolve([]); // Return empty list rather than error to avoid "Stuck" state UI
+                    }
+                });
+            });
         });
     });
 }
