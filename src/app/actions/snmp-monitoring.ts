@@ -264,6 +264,20 @@ async function sendPerformanceAlert(asset: any, metrics: any, alerts: string[]) 
 
         console.log(`[SNMP] Processing alert for ${asset.name}. Alerts found: ${alerts.length}`);
 
+        // Throttling: Check if we sent an alert recently (e.g., last 15 minutes)
+        // This prevents spamming on every refresh
+        if (asset.lastAlertSentAt) {
+            const lastSent = new Date(asset.lastAlertSentAt);
+            const now = new Date();
+            const diffMs = now.getTime() - lastSent.getTime();
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 15) {
+                console.log(`[SNMP] Alert throttled for ${asset.name}. Last sent ${diffMins} mins ago (Wait 15m).`);
+                return;
+            }
+        }
+
         // Check if notifications are enabled
         const settings = await prisma.notificationSettings.findFirst();
         if (!settings || !settings.enabled) {
@@ -297,6 +311,13 @@ async function sendPerformanceAlert(asset: any, metrics: any, alerts: string[]) 
 
         if (sent) {
             console.log(`[SNMP] Performance alert email sent successfully for ${asset.name}`);
+
+            // Update lastAlertSentAt timestamp
+            await prisma.asset.update({
+                where: { id: asset.id },
+                data: { lastAlertSentAt: new Date() }
+            });
+            console.log(`[SNMP] Updated lastAlertSentAt for ${asset.name}`);
         } else {
             console.warn(`[SNMP] Email send function returned false. Check logs in email-sender.`);
         }
