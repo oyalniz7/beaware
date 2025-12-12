@@ -10,13 +10,12 @@ services:
     environment:
       # Database connection (SQLite)
       - DATABASE_URL=file:/app/prisma/dev.db
-      
+
       # Authentication Secret (Change this!)
       - NEXTAUTH_SECRET=changeme_secret_key_123
-      
+
       # App URL (Change if running on domain/different IP)
       - NEXTAUTH_URL=http://localhost:3000
-      
       # Optional: Email Settings
       # - EMAIL_SERVER_HOST=smtp.example.com
       # - EMAIL_SERVER_PORT=587
@@ -25,3 +24,16 @@ services:
     volumes:
       # Persist database
       - ./data:/app/prisma
+
+  nginx:
+    image: nginx:alpine
+    container_name: vuln-analyzer-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+    depends_on:
+      - app
