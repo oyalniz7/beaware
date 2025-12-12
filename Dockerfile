@@ -35,11 +35,8 @@ RUN adduser --system --uid 1001 nextjs
 # Create db directory
 RUN mkdir -p /app/prisma && chown nextjs:nodejs /app/prisma
 
-# Copy Prisma Schema (Explicitly)
-COPY --from=builder --chown=nextjs:nodejs /app/prisma/schema.prisma ./prisma/schema.prisma
-
-# Init DB script coverage
-CMD ["sh", "-c", "echo 'Current directory:'; pwd; echo 'Prisma folder:'; ls -R /app/prisma; if [ ! -f /app/prisma/dev.db ]; then echo 'Initializing DB...'; cp /app/dev.db.template /app/prisma/dev.db; fi; node server.js"]
+# Init DB script
+CMD ["sh", "-c", "if [ ! -f /app/prisma/dev.db ]; then echo 'Initializing DB...'; cp /app/dev.db.template /app/prisma/dev.db; fi; node server.js"]
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

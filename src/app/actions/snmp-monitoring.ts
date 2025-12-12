@@ -258,18 +258,21 @@ export async function testSnmpConnection(
 /**
  * Send performance alert email
  */
+// Global in-memory cache for throttling (AssetID -> Timestamp)
+// This persists as long as the application process is running.
+const alertCooldowns = new Map<string, number>();
+
 async function sendPerformanceAlert(asset: any, metrics: any, alerts: string[]) {
     try {
         const { sendVulnerabilityAlert } = await import('@/lib/email-sender');
 
         console.log(`[SNMP] Processing alert for ${asset.name}. Alerts found: ${alerts.length}`);
 
-        // Throttling: Check if we sent an alert recently (e.g., last 15 minutes)
-        // This prevents spamming on every refresh
-        if (asset.lastAlertSentAt) {
-            const lastSent = new Date(asset.lastAlertSentAt);
-            const now = new Date();
-            const diffMs = now.getTime() - lastSent.getTime();
+        // Throttling: Check in-memory cache
+        // Prevents spamming on every refresh (15 min cooldown)
+        const lastSent = alertCooldowns.get(asset.id);
+        if (lastSent) {
+            const diffMs = Date.now() - lastSent;
             const diffMins = Math.floor(diffMs / 60000);
 
             if (diffMins < 15) {
@@ -312,12 +315,9 @@ async function sendPerformanceAlert(asset: any, metrics: any, alerts: string[]) 
         if (sent) {
             console.log(`[SNMP] Performance alert email sent successfully for ${asset.name}`);
 
-            // Update lastAlertSentAt timestamp
-            await prisma.asset.update({
-                where: { id: asset.id },
-                data: { lastAlertSentAt: new Date() }
-            });
-            console.log(`[SNMP] Updated lastAlertSentAt for ${asset.name}`);
+            // Update in-memory cache
+            alertCooldowns.set(asset.id, Date.now());
+            console.log(`[SNMP] Updated cooldown cache for ${asset.name}`);
         } else {
             console.warn(`[SNMP] Email send function returned false. Check logs in email-sender.`);
         }

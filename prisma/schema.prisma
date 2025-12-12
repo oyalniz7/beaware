@@ -31,7 +31,7 @@ model Asset {
   memoryThreshold   Int      @default(90)    // Alert if Memory > 90%
   storageThreshold  Int      @default(90)    // Alert if Storage > 90%
   alertRules        String?  // Comma-separated list of events to alert on: cpu,memory,storage,interface,ha
-  lastAlertSentAt   DateTime? // Timestamp of the last email alert sent to prevent spam
+
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
