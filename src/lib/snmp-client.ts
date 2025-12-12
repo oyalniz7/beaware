@@ -195,7 +195,7 @@ export async function queryDevice(
                 const fetchInterfaces = new Promise<void>((resolveIf) => {
                     const ifTableOid = '1.3.6.1.2.1.2.2.1'; // Use ifEntry
                     console.log(`[SNMP] Fetching interfaces table for ${ipAddress} (OID: ${ifTableOid})...`);
-                    session.table(ifTableOid, 20, (error: any, table: any) => {
+                    session.table(ifTableOid, 5, (error: any, table: any) => {
                         if (error) {
                             console.error(`[SNMP] Interface table fetch error for ${ipAddress}:`, error);
                         } else if (table) {
@@ -467,15 +467,15 @@ export async function getInterfaceList(
     return new Promise((resolve, reject) => {
         const session = snmp.createSession(ipAddress, community, {
             port,
-            retries: 3,
-            timeout: 15000,
+            retries: 1,
+            timeout: 10000,
             version: snmp.Version2c,
         });
 
         // Strategy 1: Try Table Walk (Efficient)
         const tableOid = '1.3.6.1.2.1.2.2.1'; // ifEntry
 
-        session.table(tableOid, 20, (error: any, table: any) => {
+        session.table(tableOid, 5, (error: any, table: any) => {
             if (!error && Object.keys(table).length > 0) {
                 const results: string[] = [];
                 for (const index in table) {
@@ -493,7 +493,7 @@ export async function getInterfaceList(
                 const descrOid = '1.3.6.1.2.1.2.2.1.2'; // ifDescr
                 const results: string[] = [];
 
-                session.subtree(descrOid, 20, (varbinds: any[]) => {
+                session.subtree(descrOid, 5, (varbinds: any[]) => {
                     for (const vb of varbinds) {
                         if (!snmp.isVarbindError(vb)) {
                             const index = vb.oid.split('.').pop();
