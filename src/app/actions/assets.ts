@@ -2,9 +2,10 @@
 
 import prisma from '@/lib/prisma';
 import { AssetSchema, AssetFormData } from '@/lib/schemas';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 
 export async function getAssets() {
+    noStore(); // Force dynamic data fetch
     try {
         const assets = await prisma.asset.findMany({
             include: {

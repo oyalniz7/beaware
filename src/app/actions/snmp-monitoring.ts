@@ -85,10 +85,13 @@ export async function getDeviceLiveStatus(assetId: string) {
     }
 }
 
+import { unstable_noStore as noStore } from 'next/cache';
+
 /**
  * Get live status for all SNMP-enabled devices
  */
 export async function getAllDevicesStatus() {
+    noStore(); // Opt out of static caching
     try {
         const assets = await prisma.asset.findMany({
             where: {
