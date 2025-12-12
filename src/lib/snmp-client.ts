@@ -87,8 +87,8 @@ export async function queryDevice(
     return new Promise((resolve) => {
         const session = snmp.createSession(ipAddress, community, {
             port,
-            retries: 1,
-            timeout: 5000,
+            retries: 2,
+            timeout: 10000,
             version: snmp.Version2c,
         });
 
@@ -467,8 +467,8 @@ export async function getInterfaceList(
     return new Promise((resolve, reject) => {
         const session = snmp.createSession(ipAddress, community, {
             port,
-            retries: 1,
-            timeout: 5000,
+            retries: 3,
+            timeout: 15000,
             version: snmp.Version2c,
         });
 
