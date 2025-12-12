@@ -6,7 +6,7 @@ services:
     container_name: vuln-analyzer
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       # Database connection (SQLite)
       - DATABASE_URL=file:/app/prisma/dev.db
@@ -15,7 +15,7 @@ services:
       - NEXTAUTH_SECRET=changeme_secret_key_123
 
       # App URL (Change if running on domain/different IP)
-      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_URL=http://localhost:3001
       # Optional: Email Settings
       # - EMAIL_SERVER_HOST=smtp.example.com
       # - EMAIL_SERVER_PORT=587

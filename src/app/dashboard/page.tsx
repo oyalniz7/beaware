@@ -1,5 +1,15 @@
 import { getDashboardStats } from '../actions/stats';
 import Link from 'next/link';
+import {
+    Server,
+    Laptop,
+    Database,
+    Globe,
+    Router,
+    Box,
+    ShieldAlert,
+    Activity
+} from 'lucide-react';
 
 export default async function DashboardPage() {
     const statsResult = await getDashboardStats();
@@ -23,6 +33,16 @@ export default async function DashboardPage() {
         'F': 'text-red-600',
     };
 
+    const getAssetIcon = (type: string) => {
+        const lowerType = type?.toLowerCase() || '';
+        if (lowerType.includes('server')) return <Server className="w-6 h-6" />;
+        if (lowerType.includes('laptop') || lowerType.includes('desktop')) return <Laptop className="w-6 h-6" />;
+        if (lowerType.includes('database') || lowerType.includes('sql')) return <Database className="w-6 h-6" />;
+        if (lowerType.includes('router') || lowerType.includes('switch') || lowerType.includes('modem')) return <Router className="w-6 h-6" />;
+        if (lowerType.includes('web') || lowerType.includes('site') || lowerType.includes('service')) return <Globe className="w-6 h-6" />;
+        return <Box className="w-6 h-6" />;
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -37,9 +57,7 @@ export default async function DashboardPage() {
                 <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-muted-foreground">Total Assets</h3>
-                        <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                        </svg>
+                        <Box className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="text-3xl font-bold mt-2">{stats.totalAssets}</div>
                     <Link href="/dashboard/assets" className="text-xs text-blue-500 hover:underline mt-2 inline-block">
@@ -50,9 +68,7 @@ export default async function DashboardPage() {
                 <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-muted-foreground">Open Vulnerabilities</h3>
-                        <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+                        <ShieldAlert className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="text-3xl font-bold mt-2">{stats.totalOpenVulnerabilities}</div>
                     <Link href="/dashboard/risks" className="text-xs text-blue-500 hover:underline mt-2 inline-block">
@@ -63,9 +79,7 @@ export default async function DashboardPage() {
                 <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-muted-foreground">Pending Scans</h3>
-                        <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                        <Activity className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="text-3xl font-bold mt-2">{stats.pendingScans}</div>
                     <div className="text-xs text-muted-foreground mt-2">Scans in progress</div>
@@ -129,9 +143,7 @@ export default async function DashboardPage() {
                     </div>
                     {stats.totalOpenVulnerabilities === 0 && (
                         <div className="mt-4 p-4 bg-green-900/20 border border-green-900/50 rounded-md text-center">
-                            <svg className="w-12 h-12 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <ShieldAlert className="w-12 h-12 mx-auto text-green-500 mb-2" />
                             <p className="text-sm text-green-500 font-medium">No open vulnerabilities!</p>
                         </div>
                     )}
@@ -146,12 +158,17 @@ export default async function DashboardPage() {
                                 <Link
                                     key={item.asset.id}
                                     href={`/dashboard/risks?assetId=${item.asset.id}`}
-                                    className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                                    className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border group"
                                 >
-                                    <div className="flex-1">
-                                        <div className="font-medium">{item.asset.name}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {item.asset.vendor} {item.asset.model}
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <div className="flex-shrink-0 p-2 bg-muted rounded-md group-hover:bg-background transition-colors">
+                                            {getAssetIcon(item.asset.type)}
+                                        </div>
+                                        <div>
+                                            <div className="font-medium">{item.asset.name}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {item.asset.vendor} {item.asset.model}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 items-center">
@@ -165,16 +182,14 @@ export default async function DashboardPage() {
                                                 {item.high} High
                                             </span>
                                         )}
-                                        <span className="text-sm font-bold">{item.count} total</span>
+                                        <span className="text-sm font-bold ml-2">{item.count} total</span>
                                     </div>
                                 </Link>
                             ))}
                         </div>
                     ) : (
                         <div className="text-center text-muted-foreground py-8">
-                            <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <ShieldAlert className="w-12 h-12 mx-auto mb-2 opacity-50" />
                             <p className="text-sm">No vulnerable assets</p>
                         </div>
                     )}
@@ -192,8 +207,12 @@ export default async function DashboardPage() {
                                 className="flex items-center justify-between p-3 rounded-md border border-border"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-2 h-2 rounded-full ${scan.status === 'COMPLETED' ? 'bg-green-500' : scan.status === 'FAILED' ? 'bg-red-500' : 'bg-yellow-500'
-                                        }`}></div>
+                                    <div className={`p-2 rounded-full ${scan.status === 'COMPLETED' ? 'bg-green-100 dark:bg-green-900/20 text-green-600' :
+                                            scan.status === 'FAILED' ? 'bg-red-100 dark:bg-red-900/20 text-red-600' :
+                                                'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600'
+                                        }`}>
+                                        {getAssetIcon(scan.asset.type)}
+                                    </div>
                                     <div>
                                         <div className="font-medium">{scan.asset.name}</div>
                                         <div className="text-xs text-muted-foreground">
@@ -219,9 +238,7 @@ export default async function DashboardPage() {
                     </div>
                 ) : (
                     <div className="text-center text-muted-foreground py-8">
-                        <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+                        <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">No scans performed yet</p>
                         <Link href="/dashboard/assets" className="text-xs text-blue-500 hover:underline mt-2 inline-block">
                             Go to assets to start scanning →
