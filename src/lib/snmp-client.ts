@@ -194,99 +194,67 @@ export async function queryDevice(
                 // We fetch columns: 2 (descr), 5 (speed), 6 (mac), 8 (operStatus), 10 (in), 16 (out)
                 // Fetch Interfaces Table (1.3.6.1.2.1.2.2) 
                 // We fetch columns: 2 (descr), 5 (speed), 6 (mac), 8 (operStatus), 10 (in), 16 (out)
+                // Fetch Interfaces (Manual Subtree Walks - More Robust than Table)
                 const fetchInterfaces = new Promise<void>((resolveIf) => {
-                    const ifTableOid = '1.3.6.1.2.1.2.2.1'; // Use ifEntry
-                    console.log(`[SNMP] Fetching interfaces table for ${ipAddress}...`);
+                    console.log(`[SNMP] Fetching interfaces manually for ${ipAddress}...`);
 
-                    // We also want to fetch ifName (1.3.6.1.2.1.31.1.1.1.1) in case ifDescr is empty
-                    // Since we can't do a single table walk for both easily with this lib's table() method on different subtrees,
-                    // we'll fetch existing table -> then if needed, fetch ifName column.
+                    const ifDescrOid = '1.3.6.1.2.1.2.2.1.2';
+                    const ifOperStatusOid = '1.3.6.1.2.1.2.2.1.8';
+                    const ifNameOid = '1.3.6.1.2.1.31.1.1.1.1';
+                    // Optional Traffic (only if needed/supported)
+                    // We'll skip traffic for now to ensure stability of status alerting, or fetch lightly.
+                    // Let's fetch status and identifiers first.
 
-                    session.table(ifTableOid, 1, (error: any, table: any) => {
-                        if (error) {
-                            console.error(`[SNMP] Interface table fetch error for ${ipAddress}:`, error);
-                            resolveIf();
-                            return;
-                        }
+                    const interfaces: Record<string, any> = {};
 
-                        if (table) {
-                            const detailedList: any[] = [];
-                            const indicesToNameLookup: Record<string, string> = {};
-                            const needsNameFetch: boolean = true; // Always check names for better accuracy if possible
-
-                            // First pass: Build initial list
-                            for (const index in table) {
-                                const entry = table[index];
-                                if (entry) {
-                                    // entry[2] is ifDescr
-                                    let name = entry[2]?.toString();
-                                    if (!name || name.trim() === '') {
-                                        name = `Port ${index}`; // Temporary placeholder
-                                    }
-
-                                    // Speed
-                                    let speed = '0';
-                                    if (entry[5]) {
-                                        const s = parseInt(entry[5].toString() || '0');
-                                        if (s >= 1000000000) speed = (s / 1000000000).toFixed(1) + 'G';
-                                        else if (s >= 1000000) speed = (s / 1000000).toFixed(0) + 'M';
-                                        else speed = (s / 1000).toFixed(0) + 'K';
-                                    }
-
-                                    // MAC
-                                    let mac = '';
-                                    if (entry[6] && Buffer.isBuffer(entry[6])) {
-                                        mac = entry[6].toString('hex').match(/.{1,2}/g)?.join(':') || '';
-                                    }
-
-                                    detailedList.push({
-                                        id: index,
-                                        name: name, // Might be 'Port X'
-                                        originalDescr: entry[2]?.toString() || '',
-                                        mac: mac,
-                                        speed: speed,
-                                        status: entry[8] === 1 ? 'Up' : 'Down',
-                                        inOctets: parseInt(entry[10]?.toString() || '0'),
-                                        outOctets: parseInt(entry[16]?.toString() || '0')
-                                    });
-                                }
-                            }
-
-                            // Fetch ifName (ifXTable) to supplement/override names
-                            // OID: 1.3.6.1.2.1.31.1.1.1.1
-                            const ifNameOid = '1.3.6.1.2.1.31.1.1.1.1';
-                            session.subtree(ifNameOid, 1, (varbinds: any[]) => {
+                    const fetchOid = (oid: string, type: 'descr' | 'status' | 'name') => {
+                        return new Promise<void>((res) => {
+                            session.subtree(oid, 1, (varbinds: any[]) => {
                                 for (const vb of varbinds) {
                                     if (!snmp.isVarbindError(vb)) {
-                                        const idx = vb.oid.split('.').pop();
-                                        if (idx) indicesToNameLookup[idx] = vb.value?.toString();
+                                        const idx = vb.oid.split('.').pop() as string;
+                                        if (!interfaces[idx]) interfaces[idx] = { id: idx };
+
+                                        if (type === 'descr') interfaces[idx].descr = vb.value?.toString();
+                                        else if (type === 'status') interfaces[idx].status = vb.value; // 1=Up, 2=Down
+                                        else if (type === 'name') interfaces[idx].name = vb.value?.toString();
                                     }
                                 }
-                            }, (errName: any) => {
-                                // After ifName fetch (success or fail), finalize the list
-                                if (!errName) {
-                                    detailedList.forEach(item => {
-                                        // If original descr was empty OR if we have a better name in ifName, use it.
-                                        // Usually ifName (Gi0/1) is better than ifDescr (GigabitEthernet0/1 described...)
-                                        // But logic: If we have an ifName look up, use it.
-                                        // Especially if the current name is "Port X" placeholder.
-                                        if (indicesToNameLookup[item.id]) {
-                                            // If originalDescr is empty, definitely use ifName.
-                                            // If originalDescr exists, maybe prefer ifName? 
-                                            // Let's prefer ifName if available as it's usually the canonical "interface name".
-                                            item.name = indicesToNameLookup[item.id];
-                                        }
-                                    });
-                                }
-
-                                metrics.interfaces = { count: detailedList.length, list: detailedList.slice(0, 48) };
-                                console.log(`[SNMP] QueryDevice found ${detailedList.length} interfaces.`);
-                                resolveIf();
+                            }, (err: any) => {
+                                if (err) console.warn(`[SNMP] Failed to fetch ${type} for ${ipAddress}: ${err.message}`);
+                                res();
                             });
-                        } else {
-                            console.log(`[SNMP] No interface table returned for ${ipAddress}`);
-                            resolveIf();
-                        }
+                        });
+                    };
+
+                    // Run fetches in parallel for speed
+                    Promise.all([
+                        fetchOid(ifDescrOid, 'descr'),
+                        fetchOid(ifOperStatusOid, 'status'),
+                        fetchOid(ifNameOid, 'name')
+                    ]).then(() => {
+                        const detailedList: any[] = [];
+                        Object.values(interfaces).forEach((iface: any) => {
+                            // Logic to select best name
+                            let finalName = 'Port ' + iface.id;
+                            if (iface.name && iface.name.trim() !== '') finalName = iface.name;
+                            else if (iface.descr && iface.descr.trim() !== '') finalName = iface.descr;
+
+                            detailedList.push({
+                                id: iface.id,
+                                name: finalName,
+                                originalDescr: iface.descr || '',
+                                status: iface.status === 1 ? 'Up' : 'Down',
+                                mac: '', // Skipped for speed/stability
+                                speed: '',
+                                inOctets: 0,
+                                outOctets: 0
+                            });
+                        });
+
+                        console.log(`[SNMP] Manual scan found ${detailedList.length} interfaces.`);
+                        metrics.interfaces = { count: detailedList.length, list: detailedList.slice(0, 48) };
+                        resolveIf();
                     });
                 });
 
