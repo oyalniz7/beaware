@@ -31,13 +31,17 @@ export async function getDeviceLiveStatus(assetId: string) {
         // Filter interfaces if watchedInterfaces is set
         if (asset.watchedInterfaces && metrics.interfaces && metrics.interfaces.list) {
             const watched = asset.watchedInterfaces.split(',').map((s: string) => s.trim());
+            console.log(`[SNMP_DEBUG] Asset: ${asset.name} | Watched Config: [${watched.join(', ')}]`);
 
-            // Debug Log
-            // console.log(`[SNMP] Filtering interfaces. Watched: ${watched.join('|')}`);
+            // Log available interfaces for comparison
+            const availableNames = metrics.interfaces.list.map((i: any) => i.name);
+            console.log(`[SNMP_DEBUG] Asset: ${asset.name} | Available Interfaces: [${availableNames.join(', ')}]`);
 
             metrics.interfaces.list = metrics.interfaces.list.filter((iface: any) =>
                 watched.includes(iface.name)
             );
+
+            console.log(`[SNMP_DEBUG] Asset: ${asset.name} | After Filter: ${metrics.interfaces.list.length} interfaces match.`);
             // We keep the total count as is, or maybe irrelevant. 
             // User wants to focus on these.
         }
@@ -53,6 +57,7 @@ export async function getDeviceLiveStatus(assetId: string) {
 
         // Check thresholds and send alert if exceeded
         if (metrics.online && metrics.performance) {
+            console.log(`[SNMP_DEBUG] Checking thresholds for ${asset.name}. Rules: ${asset.alertRules}`);
             const thresholdCheck = checkThresholds(
                 metrics,
                 asset.cpuThreshold,
@@ -60,6 +65,8 @@ export async function getDeviceLiveStatus(assetId: string) {
                 asset.storageThreshold || 90,
                 asset.alertRules || ''
             );
+
+            console.log(`[SNMP_DEBUG] Threshold Result for ${asset.name}: Exceeded=${thresholdCheck.exceeded}, Alerts=[${thresholdCheck.alerts.join(', ')}]`);
 
             if (thresholdCheck.exceeded) {
                 // Send email alert
