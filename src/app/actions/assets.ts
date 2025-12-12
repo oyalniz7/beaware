@@ -44,7 +44,10 @@ export async function createAsset(data: AssetFormData) {
                 snmpPort: parsed.data.snmpPort ?? 161,
                 cpuThreshold: parsed.data.cpuThreshold ?? 80,
                 memoryThreshold: parsed.data.memoryThreshold ?? 90,
+                storageThreshold: parsed.data.storageThreshold ?? 90,
                 snmpMetrics: parsed.data.snmpMetrics ?? null,
+                alertRules: parsed.data.alertRules ?? null,
+                watchedInterfaces: parsed.data.watchedInterfaces ?? null,
             }
         });
         revalidatePath('/dashboard/assets');
