@@ -14,7 +14,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Client and Template DB
-ENV DATABASE_URL="file:./dev.db"
+# Use absolute path for build time to ensure we know where it is
+ENV DATABASE_URL="file:///app/prisma/dev.db"
 RUN npx prisma generate
 RUN npx prisma db push
 
