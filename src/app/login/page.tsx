@@ -42,7 +42,7 @@ function LoginForm() {
     return (
         <div className="max-w-md w-full space-y-8">
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-white">VulnAnalyzer</h1>
+                <h1 className="text-3xl font-bold text-white">BeAware</h1>
                 <h2 className="mt-4 text-xl font-semibold text-gray-400">Sign In</h2>
             </div>
 
