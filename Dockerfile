@@ -43,7 +43,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy Template DB (created in builder at root)
-COPY --from=builder --chown=nextjs:nodejs /app/dev.db /app/prisma/dev.db.template
+COPY --from=builder --chown=nextjs:nodejs /app/dev.db /app/dev.db.template
 
 USER nextjs
 
@@ -52,4 +52,4 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 # Init DB script
-CMD ["sh", "-c", "if [ ! -f /app/prisma/dev.db ]; then echo 'Initializing DB...'; cp /app/prisma/dev.db.template /app/prisma/dev.db; fi; node server.js"]
+CMD ["sh", "-c", "if [ ! -f /app/prisma/dev.db ]; then echo 'Initializing DB...'; cp /app/dev.db.template /app/prisma/dev.db; fi; node server.js"]
