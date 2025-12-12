@@ -472,47 +472,29 @@ export async function getInterfaceList(
             version: snmp.Version2c,
         });
 
-        // Strategy 1: Try Table Walk (Efficient)
-        const tableOid = '1.3.6.1.2.1.2.2.1'; // ifEntry
+        // Efficient Interface Discovery: Just walk ifDescr
+        // This is much faster than walking the whole ifEntry table and works on almost all devices.
+        const descrOid = '1.3.6.1.2.1.2.2.1.2'; // ifDescr
+        const results: string[] = [];
 
-        session.table(tableOid, 1, (error: any, table: any) => {
-            if (!error && Object.keys(table).length > 0) {
-                const results: string[] = [];
-                for (const index in table) {
-                    const entry = table[index];
-                    const name = entry[2]?.toString() || `Port ${index}`;
+        console.log(`[SNMP] Starting lightweight interface scan for ${ipAddress}...`);
+
+        session.subtree(descrOid, 1, (varbinds: any[]) => {
+            for (const vb of varbinds) {
+                if (!snmp.isVarbindError(vb)) {
+                    const index = vb.oid.split('.').pop();
+                    const name = vb.value?.toString() || `Port ${index}`;
                     results.push(name);
                 }
-                console.log(`[SNMP] Table walk found ${results.length} interfaces for ${ipAddress}`);
-                session.close();
-                resolve(results);
+            }
+        }, (error: any) => {
+            session.close();
+            if (error) {
+                console.error(`[SNMP] Interface scan error for ${ipAddress}:`, error);
+                reject(new Error(error.message || 'Scan failed (Timeout or Network Error)'));
             } else {
-                console.log(`[SNMP] Table walk failed or empty (${error?.message || 'Empty'}), trying subtree fallback...`);
-
-                // Strategy 2: Fallback to Subtree on ifDescr (Compatible)
-                const descrOid = '1.3.6.1.2.1.2.2.1.2'; // ifDescr
-                const results: string[] = [];
-
-                session.subtree(descrOid, 1, (varbinds: any[]) => {
-                    for (const vb of varbinds) {
-                        if (!snmp.isVarbindError(vb)) {
-                            const index = vb.oid.split('.').pop();
-                            const name = vb.value?.toString() || `Port ${index}`;
-                            results.push(name);
-                        }
-                    }
-                }, (subtreeError: any) => {
-                    session.close();
-                    if (subtreeError) {
-                        console.error(`[SNMP] Fallback subtree error for ${ipAddress}:`, subtreeError);
-                        // Propagate the actual error to the UI
-                        reject(new Error(subtreeError.message || 'Scan failed'));
-                    } else {
-                        console.log(`[SNMP] Subtree found ${results.length} interfaces for ${ipAddress}`);
-                        // If still empty, it actually found nothing
-                        resolve(results);
-                    }
-                });
+                console.log(`[SNMP] Scan complete. Found ${results.length} interfaces for ${ipAddress}`);
+                resolve(results);
             }
         });
     });
