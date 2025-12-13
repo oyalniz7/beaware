@@ -39,6 +39,9 @@ RUN mkdir -p /app/prisma && chown nextjs:nodejs /app/prisma
 CMD ["sh", "-c", "if [ ! -f /app/prisma/dev.db ]; then echo 'Initializing DB...'; cp /app/dev.db.template /app/prisma/dev.db; fi; node server.js"]
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
 # Copy Template DB (created in builder at root)
 COPY --from=builder --chown=nextjs:nodejs /app/dev.db /app/dev.db.template

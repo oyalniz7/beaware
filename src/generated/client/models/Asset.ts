@@ -27,6 +27,7 @@ export type AggregateAsset = {
 }
 
 export type AssetAvgAggregateOutputType = {
+  uptime: number | null
   snmpPort: number | null
   cpuThreshold: number | null
   memoryThreshold: number | null
@@ -34,6 +35,7 @@ export type AssetAvgAggregateOutputType = {
 }
 
 export type AssetSumAggregateOutputType = {
+  uptime: number | null
   snmpPort: number | null
   cpuThreshold: number | null
   memoryThreshold: number | null
@@ -48,6 +50,13 @@ export type AssetMinAggregateOutputType = {
   model: string | null
   version: string | null
   ipAddress: string | null
+  macAddress: string | null
+  os: string | null
+  kernel: string | null
+  cpu: string | null
+  memory: string | null
+  uptime: number | null
+  lastSeen: Date | null
   location: string | null
   cpe: string | null
   snmpEnabled: boolean | null
@@ -72,6 +81,13 @@ export type AssetMaxAggregateOutputType = {
   model: string | null
   version: string | null
   ipAddress: string | null
+  macAddress: string | null
+  os: string | null
+  kernel: string | null
+  cpu: string | null
+  memory: string | null
+  uptime: number | null
+  lastSeen: Date | null
   location: string | null
   cpe: string | null
   snmpEnabled: boolean | null
@@ -96,6 +112,13 @@ export type AssetCountAggregateOutputType = {
   model: number
   version: number
   ipAddress: number
+  macAddress: number
+  os: number
+  kernel: number
+  cpu: number
+  memory: number
+  uptime: number
+  lastSeen: number
   location: number
   cpe: number
   snmpEnabled: number
@@ -115,6 +138,7 @@ export type AssetCountAggregateOutputType = {
 
 
 export type AssetAvgAggregateInputType = {
+  uptime?: true
   snmpPort?: true
   cpuThreshold?: true
   memoryThreshold?: true
@@ -122,6 +146,7 @@ export type AssetAvgAggregateInputType = {
 }
 
 export type AssetSumAggregateInputType = {
+  uptime?: true
   snmpPort?: true
   cpuThreshold?: true
   memoryThreshold?: true
@@ -136,6 +161,13 @@ export type AssetMinAggregateInputType = {
   model?: true
   version?: true
   ipAddress?: true
+  macAddress?: true
+  os?: true
+  kernel?: true
+  cpu?: true
+  memory?: true
+  uptime?: true
+  lastSeen?: true
   location?: true
   cpe?: true
   snmpEnabled?: true
@@ -160,6 +192,13 @@ export type AssetMaxAggregateInputType = {
   model?: true
   version?: true
   ipAddress?: true
+  macAddress?: true
+  os?: true
+  kernel?: true
+  cpu?: true
+  memory?: true
+  uptime?: true
+  lastSeen?: true
   location?: true
   cpe?: true
   snmpEnabled?: true
@@ -184,6 +223,13 @@ export type AssetCountAggregateInputType = {
   model?: true
   version?: true
   ipAddress?: true
+  macAddress?: true
+  os?: true
+  kernel?: true
+  cpu?: true
+  memory?: true
+  uptime?: true
+  lastSeen?: true
   location?: true
   cpe?: true
   snmpEnabled?: true
@@ -295,6 +341,13 @@ export type AssetGroupByOutputType = {
   model: string | null
   version: string | null
   ipAddress: string | null
+  macAddress: string | null
+  os: string | null
+  kernel: string | null
+  cpu: string | null
+  memory: string | null
+  uptime: number | null
+  lastSeen: Date
   location: string | null
   cpe: string | null
   snmpEnabled: boolean
@@ -342,6 +395,13 @@ export type AssetWhereInput = {
   model?: Prisma.StringNullableFilter<"Asset"> | string | null
   version?: Prisma.StringNullableFilter<"Asset"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Asset"> | string | null
+  macAddress?: Prisma.StringNullableFilter<"Asset"> | string | null
+  os?: Prisma.StringNullableFilter<"Asset"> | string | null
+  kernel?: Prisma.StringNullableFilter<"Asset"> | string | null
+  cpu?: Prisma.StringNullableFilter<"Asset"> | string | null
+  memory?: Prisma.StringNullableFilter<"Asset"> | string | null
+  uptime?: Prisma.IntNullableFilter<"Asset"> | number | null
+  lastSeen?: Prisma.DateTimeFilter<"Asset"> | Date | string
   location?: Prisma.StringNullableFilter<"Asset"> | string | null
   cpe?: Prisma.StringNullableFilter<"Asset"> | string | null
   snmpEnabled?: Prisma.BoolFilter<"Asset"> | boolean
@@ -368,6 +428,13 @@ export type AssetOrderByWithRelationInput = {
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrderInput | Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  os?: Prisma.SortOrderInput | Prisma.SortOrder
+  kernel?: Prisma.SortOrderInput | Prisma.SortOrder
+  cpu?: Prisma.SortOrderInput | Prisma.SortOrder
+  memory?: Prisma.SortOrderInput | Prisma.SortOrder
+  uptime?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastSeen?: Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   cpe?: Prisma.SortOrderInput | Prisma.SortOrder
   snmpEnabled?: Prisma.SortOrder
@@ -397,6 +464,13 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   model?: Prisma.StringNullableFilter<"Asset"> | string | null
   version?: Prisma.StringNullableFilter<"Asset"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Asset"> | string | null
+  macAddress?: Prisma.StringNullableFilter<"Asset"> | string | null
+  os?: Prisma.StringNullableFilter<"Asset"> | string | null
+  kernel?: Prisma.StringNullableFilter<"Asset"> | string | null
+  cpu?: Prisma.StringNullableFilter<"Asset"> | string | null
+  memory?: Prisma.StringNullableFilter<"Asset"> | string | null
+  uptime?: Prisma.IntNullableFilter<"Asset"> | number | null
+  lastSeen?: Prisma.DateTimeFilter<"Asset"> | Date | string
   location?: Prisma.StringNullableFilter<"Asset"> | string | null
   cpe?: Prisma.StringNullableFilter<"Asset"> | string | null
   snmpEnabled?: Prisma.BoolFilter<"Asset"> | boolean
@@ -423,6 +497,13 @@ export type AssetOrderByWithAggregationInput = {
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrderInput | Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  os?: Prisma.SortOrderInput | Prisma.SortOrder
+  kernel?: Prisma.SortOrderInput | Prisma.SortOrder
+  cpu?: Prisma.SortOrderInput | Prisma.SortOrder
+  memory?: Prisma.SortOrderInput | Prisma.SortOrder
+  uptime?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastSeen?: Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   cpe?: Prisma.SortOrderInput | Prisma.SortOrder
   snmpEnabled?: Prisma.SortOrder
@@ -455,6 +536,13 @@ export type AssetScalarWhereWithAggregatesInput = {
   model?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   version?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   ipAddress?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  macAddress?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  os?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  kernel?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  cpu?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  memory?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  uptime?: Prisma.IntNullableWithAggregatesFilter<"Asset"> | number | null
+  lastSeen?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
   location?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   cpe?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   snmpEnabled?: Prisma.BoolWithAggregatesFilter<"Asset"> | boolean
@@ -479,6 +567,13 @@ export type AssetCreateInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -505,6 +600,13 @@ export type AssetUncheckedCreateInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -531,6 +633,13 @@ export type AssetUpdateInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -557,6 +666,13 @@ export type AssetUncheckedUpdateInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -583,6 +699,13 @@ export type AssetCreateManyInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -607,6 +730,13 @@ export type AssetUpdateManyMutationInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -631,6 +761,13 @@ export type AssetUncheckedUpdateManyInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -655,6 +792,13 @@ export type AssetCountOrderByAggregateInput = {
   model?: Prisma.SortOrder
   version?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
+  os?: Prisma.SortOrder
+  kernel?: Prisma.SortOrder
+  cpu?: Prisma.SortOrder
+  memory?: Prisma.SortOrder
+  uptime?: Prisma.SortOrder
+  lastSeen?: Prisma.SortOrder
   location?: Prisma.SortOrder
   cpe?: Prisma.SortOrder
   snmpEnabled?: Prisma.SortOrder
@@ -672,6 +816,7 @@ export type AssetCountOrderByAggregateInput = {
 }
 
 export type AssetAvgOrderByAggregateInput = {
+  uptime?: Prisma.SortOrder
   snmpPort?: Prisma.SortOrder
   cpuThreshold?: Prisma.SortOrder
   memoryThreshold?: Prisma.SortOrder
@@ -686,6 +831,13 @@ export type AssetMaxOrderByAggregateInput = {
   model?: Prisma.SortOrder
   version?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
+  os?: Prisma.SortOrder
+  kernel?: Prisma.SortOrder
+  cpu?: Prisma.SortOrder
+  memory?: Prisma.SortOrder
+  uptime?: Prisma.SortOrder
+  lastSeen?: Prisma.SortOrder
   location?: Prisma.SortOrder
   cpe?: Prisma.SortOrder
   snmpEnabled?: Prisma.SortOrder
@@ -710,6 +862,13 @@ export type AssetMinOrderByAggregateInput = {
   model?: Prisma.SortOrder
   version?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
+  os?: Prisma.SortOrder
+  kernel?: Prisma.SortOrder
+  cpu?: Prisma.SortOrder
+  memory?: Prisma.SortOrder
+  uptime?: Prisma.SortOrder
+  lastSeen?: Prisma.SortOrder
   location?: Prisma.SortOrder
   cpe?: Prisma.SortOrder
   snmpEnabled?: Prisma.SortOrder
@@ -727,6 +886,7 @@ export type AssetMinOrderByAggregateInput = {
 }
 
 export type AssetSumOrderByAggregateInput = {
+  uptime?: Prisma.SortOrder
   snmpPort?: Prisma.SortOrder
   cpuThreshold?: Prisma.SortOrder
   memoryThreshold?: Prisma.SortOrder
@@ -746,6 +906,18 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
@@ -756,10 +928,6 @@ export type IntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type AssetCreateNestedOneWithoutRisksInput = {
@@ -798,6 +966,13 @@ export type AssetCreateWithoutRisksInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -823,6 +998,13 @@ export type AssetUncheckedCreateWithoutRisksInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -864,6 +1046,13 @@ export type AssetUpdateWithoutRisksInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -889,6 +1078,13 @@ export type AssetUncheckedUpdateWithoutRisksInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -914,6 +1110,13 @@ export type AssetCreateWithoutScansInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -939,6 +1142,13 @@ export type AssetUncheckedCreateWithoutScansInput = {
   model?: string | null
   version?: string | null
   ipAddress?: string | null
+  macAddress?: string | null
+  os?: string | null
+  kernel?: string | null
+  cpu?: string | null
+  memory?: string | null
+  uptime?: number | null
+  lastSeen?: Date | string
   location?: string | null
   cpe?: string | null
   snmpEnabled?: boolean
@@ -980,6 +1190,13 @@ export type AssetUpdateWithoutScansInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1005,6 +1222,13 @@ export type AssetUncheckedUpdateWithoutScansInput = {
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  os?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kernel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uptime?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cpe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   snmpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1070,6 +1294,13 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   model?: boolean
   version?: boolean
   ipAddress?: boolean
+  macAddress?: boolean
+  os?: boolean
+  kernel?: boolean
+  cpu?: boolean
+  memory?: boolean
+  uptime?: boolean
+  lastSeen?: boolean
   location?: boolean
   cpe?: boolean
   snmpEnabled?: boolean
@@ -1097,6 +1328,13 @@ export type AssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   model?: boolean
   version?: boolean
   ipAddress?: boolean
+  macAddress?: boolean
+  os?: boolean
+  kernel?: boolean
+  cpu?: boolean
+  memory?: boolean
+  uptime?: boolean
+  lastSeen?: boolean
   location?: boolean
   cpe?: boolean
   snmpEnabled?: boolean
@@ -1121,6 +1359,13 @@ export type AssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   model?: boolean
   version?: boolean
   ipAddress?: boolean
+  macAddress?: boolean
+  os?: boolean
+  kernel?: boolean
+  cpu?: boolean
+  memory?: boolean
+  uptime?: boolean
+  lastSeen?: boolean
   location?: boolean
   cpe?: boolean
   snmpEnabled?: boolean
@@ -1145,6 +1390,13 @@ export type AssetSelectScalar = {
   model?: boolean
   version?: boolean
   ipAddress?: boolean
+  macAddress?: boolean
+  os?: boolean
+  kernel?: boolean
+  cpu?: boolean
+  memory?: boolean
+  uptime?: boolean
+  lastSeen?: boolean
   location?: boolean
   cpe?: boolean
   snmpEnabled?: boolean
@@ -1161,7 +1413,7 @@ export type AssetSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "vendor" | "model" | "version" | "ipAddress" | "location" | "cpe" | "snmpEnabled" | "snmpCommunity" | "snmpVersion" | "snmpPort" | "snmpMetrics" | "watchedInterfaces" | "cpuThreshold" | "memoryThreshold" | "storageThreshold" | "alertRules" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
+export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "vendor" | "model" | "version" | "ipAddress" | "macAddress" | "os" | "kernel" | "cpu" | "memory" | "uptime" | "lastSeen" | "location" | "cpe" | "snmpEnabled" | "snmpCommunity" | "snmpVersion" | "snmpPort" | "snmpMetrics" | "watchedInterfaces" | "cpuThreshold" | "memoryThreshold" | "storageThreshold" | "alertRules" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
 export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   scans?: boolean | Prisma.Asset$scansArgs<ExtArgs>
   risks?: boolean | Prisma.Asset$risksArgs<ExtArgs>
@@ -1184,6 +1436,13 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     model: string | null
     version: string | null
     ipAddress: string | null
+    macAddress: string | null
+    os: string | null
+    kernel: string | null
+    cpu: string | null
+    memory: string | null
+    uptime: number | null
+    lastSeen: Date
     location: string | null
     cpe: string | null
     snmpEnabled: boolean
@@ -1630,6 +1889,13 @@ export interface AssetFieldRefs {
   readonly model: Prisma.FieldRef<"Asset", 'String'>
   readonly version: Prisma.FieldRef<"Asset", 'String'>
   readonly ipAddress: Prisma.FieldRef<"Asset", 'String'>
+  readonly macAddress: Prisma.FieldRef<"Asset", 'String'>
+  readonly os: Prisma.FieldRef<"Asset", 'String'>
+  readonly kernel: Prisma.FieldRef<"Asset", 'String'>
+  readonly cpu: Prisma.FieldRef<"Asset", 'String'>
+  readonly memory: Prisma.FieldRef<"Asset", 'String'>
+  readonly uptime: Prisma.FieldRef<"Asset", 'Int'>
+  readonly lastSeen: Prisma.FieldRef<"Asset", 'DateTime'>
   readonly location: Prisma.FieldRef<"Asset", 'String'>
   readonly cpe: Prisma.FieldRef<"Asset", 'String'>
   readonly snmpEnabled: Prisma.FieldRef<"Asset", 'Boolean'>

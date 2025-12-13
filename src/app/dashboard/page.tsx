@@ -35,12 +35,12 @@ export default async function DashboardPage() {
 
     const getAssetIcon = (type: string) => {
         const lowerType = type?.toLowerCase() || '';
-        if (lowerType.includes('server')) return <Server className="w-6 h-6" />;
-        if (lowerType.includes('laptop') || lowerType.includes('desktop')) return <Laptop className="w-6 h-6" />;
-        if (lowerType.includes('database') || lowerType.includes('sql')) return <Database className="w-6 h-6" />;
-        if (lowerType.includes('router') || lowerType.includes('switch') || lowerType.includes('modem')) return <Router className="w-6 h-6" />;
-        if (lowerType.includes('web') || lowerType.includes('site') || lowerType.includes('service')) return <Globe className="w-6 h-6" />;
-        return <Box className="w-6 h-6" />;
+        if (lowerType.includes('server')) return Server;
+        if (lowerType.includes('laptop') || lowerType.includes('desktop')) return Laptop;
+        if (lowerType.includes('database') || lowerType.includes('sql')) return Database;
+        if (lowerType.includes('router') || lowerType.includes('switch') || lowerType.includes('modem')) return Router;
+        if (lowerType.includes('web') || lowerType.includes('site') || lowerType.includes('service')) return Globe;
+        return Box; // Default
     };
 
     return (
@@ -160,29 +160,34 @@ export default async function DashboardPage() {
                                     href={`/dashboard/risks?assetId=${item.asset.id}`}
                                     className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border group"
                                 >
-                                    <div className="flex items-center gap-3 flex-1">
-                                        <div className="flex-shrink-0 p-2 bg-muted rounded-md group-hover:bg-background transition-colors">
-                                            {getAssetIcon(item.asset.type)}
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div className="flex-shrink-0 w-12 h-12 relative rounded-md overflow-hidden bg-primary/10 flex items-center justify-center text-primary">
+                                            {(() => {
+                                                const Icon = getAssetIcon(item.asset.type);
+                                                return <Icon size={24} />;
+                                            })()}
                                         </div>
                                         <div>
-                                            <div className="font-medium">{item.asset.name}</div>
-                                            <div className="text-xs text-muted-foreground">
+                                            <div className="font-medium text-lg">{item.asset.name}</div>
+                                            <div className="text-sm text-muted-foreground">
                                                 {item.asset.vendor} {item.asset.model}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 items-center">
-                                        {item.critical > 0 && (
-                                            <span className="px-2 py-1 bg-red-900/20 text-red-500 rounded text-xs font-semibold">
-                                                {item.critical} Critical
-                                            </span>
-                                        )}
-                                        {item.high > 0 && (
-                                            <span className="px-2 py-1 bg-orange-900/20 text-orange-500 rounded text-xs font-semibold">
-                                                {item.high} High
-                                            </span>
-                                        )}
-                                        <span className="text-sm font-bold ml-2">{item.count} total</span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <div className="flex gap-2">
+                                            {item.critical > 0 && (
+                                                <span className="px-2 py-1 bg-red-900/40 border border-red-500/50 text-red-400 rounded text-xs font-bold shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                                                    {item.critical} CRIT
+                                                </span>
+                                            )}
+                                            {item.high > 0 && (
+                                                <span className="px-2 py-1 bg-orange-900/40 border border-orange-500/50 text-orange-400 rounded text-xs font-bold shadow-[0_0_10px_rgba(249,115,22,0.2)]">
+                                                    {item.high} HIGH
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-muted-foreground font-medium mt-1">{item.count} total risks</span>
                                     </div>
                                 </Link>
                             ))}
@@ -200,38 +205,41 @@ export default async function DashboardPage() {
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Recent Scan Activity</h3>
                 {stats.recentScans.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                         {stats.recentScans.map((scan: any) => (
                             <div
                                 key={scan.id}
-                                className="flex items-center justify-between p-3 rounded-md border border-border"
+                                className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full ${scan.status === 'COMPLETED' ? 'bg-green-100 dark:bg-green-900/20 text-green-600' :
-                                            scan.status === 'FAILED' ? 'bg-red-100 dark:bg-red-900/20 text-red-600' :
-                                                'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600'
-                                        }`}>
-                                        {getAssetIcon(scan.asset.type)}
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                        {(() => {
+                                            const Icon = getAssetIcon(scan.asset.type);
+                                            return <Icon size={20} />;
+                                        })()}
                                     </div>
+
                                     <div>
                                         <div className="font-medium">{scan.asset.name}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {new Date(scan.createdAt).toLocaleString()}
+                                        <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                            <span>{new Date(scan.createdAt).toLocaleString()}</span>
+                                            <span className="w-1 h-1 rounded-full bg-muted-foreground/50"></span>
+                                            <span>{scan.status}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     {scan.status === 'COMPLETED' && scan.vulnerabilitiesFound !== null && (
-                                        <span className="text-sm">
-                                            <span className="font-bold">{scan.vulnerabilitiesFound}</span> vulnerabilities
+                                        <span className="text-sm font-medium">
+                                            <span className={`font-bold ${scan.vulnerabilitiesFound > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                                                {scan.vulnerabilitiesFound}
+                                            </span> issues
                                         </span>
                                     )}
-                                    <span className={`px-2 py-1 rounded text-xs font-medium ${scan.status === 'COMPLETED' ? 'bg-green-900/20 text-green-500' :
-                                        scan.status === 'FAILED' ? 'bg-red-900/20 text-red-500' :
-                                            'bg-yellow-900/20 text-yellow-500'
-                                        }`}>
-                                        {scan.status}
-                                    </span>
+                                    <div className={`w-3 h-3 rounded-full shadow-[0_0_8px_currentColor] ${scan.status === 'COMPLETED' ? 'text-green-500 bg-green-500' :
+                                        scan.status === 'FAILED' ? 'text-red-500 bg-red-500' :
+                                            'text-yellow-500 bg-yellow-500'
+                                        }`}></div>
                                 </div>
                             </div>
                         ))}

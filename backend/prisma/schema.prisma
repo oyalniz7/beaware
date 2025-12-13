@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client"
+  previewFeatures = ["driverAdapters"]
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Asset {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // Hardware, Software, Service
+  vendor      String?
+  model       String?
+  version     String?
+  ipAddress   String?
+  macAddress  String?
+  os          String?
+  kernel      String?
+  cpu         String?
+  memory      String?
+  uptime      Int?     // (seconds)
+  lastSeen    DateTime @default(now())
+  location    String?
+  cpe         String?
+  
+  // SNMP Configuration
+  snmpEnabled       Boolean  @default(false)
+  snmpCommunity     String?  // Community string (v2c)
+  snmpVersion       String   @default("v2c") // v1, v2c, v3
+  snmpPort          Int      @default(161)
+  snmpMetrics       String?  // Comma-separated list of metrics to monitor
+  watchedInterfaces String?  // Comma-separated list of interface names to monitor specifically
+  
+  // Monitoring Thresholds
+  cpuThreshold      Int      @default(80)    // Alert if CPU > 80%
+  memoryThreshold   Int      @default(90)    // Alert if Memory > 90%
+  storageThreshold  Int      @default(90)    // Alert if Storage > 90%
+  alertRules        String?  // Comma-separated list of events to alert on: cpu,memory,storage,interface,ha
+
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  scans       Scan[]
+  risks       RiskAssessment[]
+}
+
+
+model Vulnerability {
+  id          String   @id @default(cuid())
+  cveId       String   @unique // e.g. CVE-2024-1234
+  description String
+  severity    String   // "CRITICAL", "HIGH", "MEDIUM", "LOW", "NONE"
+  score       Float?   // CVSS Score
+  cvssVector  String?  // CVSS 3.x vector string
+  references  String?  // JSON string of related links/advisories
+  publishedAt DateTime
+  lastModified DateTime?
+  
+  risks       RiskAssessment[]
+}
+
+model RiskAssessment {
+  id              String         @id @default(cuid())
+  assetId         String
+  vulnerabilityId String
+  status          String         @default("OPEN") // OPEN, MITIGATED, ACCEPTED, FALSE_POSITIVE
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  asset           Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  vulnerability   Vulnerability  @relation(fields: [vulnerabilityId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, vulnerabilityId])
+}
+
+model NotificationSettings {
+  id                  String   @id @default(cuid())
+  email               String
+  smtpHost            String   @default("smtp.office365.com")
+  smtpPort            Int      @default(587)
+  smtpUsername        String
+  smtpPassword        String
+  enabled             Boolean  @default(true)
+  severityThreshold   String   @default("HIGH") // CRITICAL, HIGH, MEDIUM, LOW
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ScheduledScan {
+  id                  String   @id @default(cuid())
+  enabled             Boolean  @default(false)
+  frequency           String   @default("daily") // daily, weekly, monthly
+  lastRunAt           DateTime?
+  nextRunAt           DateTime?
+  scanAllAssets       Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Scan {
+  id                    String    @id @default(cuid())
+  assetId               String
+  status                String    @default("PENDING") // "PENDING", "RUNNING", "COMPLETED", "FAILED"
+  vulnerabilitiesFound  Int       @default(0)
+  errorMessage          String?
+  
+  asset                 Asset     @relation(fields: [assetId], references: [id])
+  
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  
+  @@index([assetId])
+  @@index([status])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed
+  name      String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

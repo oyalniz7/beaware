@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const riskController_1 = require("../controllers/riskController");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateToken);
+router.get('/vulnerabilities', riskController_1.getVulnerabilities);
+router.post('/vulnerabilities', riskController_1.createVulnerability);
+router.get('/risks', riskController_1.getRisks);
+router.put('/risks/:id', riskController_1.updateRiskStatus);
+exports.default = router;
